@@ -8,14 +8,14 @@
     <version>3.4.3</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
-  <groupId>com.transporte</groupId>
+  <groupId>com.informa</groupId>
   <artifactId>BackPruTecGestionTareas</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>BackPruTecGestionLogisticaTransporte</name>
-  <description>Prueba tecnica gestin logistica de transporte</description>
+  <name>BackPruTecGestionTareas</name>
+  <description>Prueba tecnica gestin de gestion de tareas</description>
   <properties>
     <java.version>23</java.version>
-    <start-class>com.mainsoft.tareas.GestionTransporteApplication</start-class>
+    <start-class>com.informa.tareas.GestionTareasApplication</start-class>
     <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
   </properties>
   <dependencies>
@@ -107,6 +107,12 @@
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
+    <dependency>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>4.0.0-beta-2</version>
     </dependency>
   </dependencies>
 
