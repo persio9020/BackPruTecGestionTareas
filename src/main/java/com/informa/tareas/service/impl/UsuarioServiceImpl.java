@@ -85,7 +85,6 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    @Transactional
     public Mono<UsuarioResponse> guardarUsuario(UsuarioRequest usuario, Locale locale) {
         return Mono.just(usuario)
                 .map(u -> this.validarRequest(u, locale))
