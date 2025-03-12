@@ -14,17 +14,12 @@ import com.informa.tareas.repository.UsuarioRepository;
 import com.informa.tareas.repository.UsuarioRolRepository;
 import com.informa.tareas.service.UsuarioService;
 import jakarta.validation.Validator;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -85,18 +80,21 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Transactional
     public Mono<UsuarioResponse> guardarUsuario(UsuarioRequest usuario, Locale locale) {
-        return Mono.just(usuario)
-                .map(u -> this.validarRequest(u, locale))
-                .map(u -> this.usuarioRequestToUsuario.map(u))
-                .flatMap(u -> {
-                    u.setContrasenia(pbkdf2Encoder.encode(u.getContrasenia()));
-                    return Mono.just(usuarioRepository.save(u));
-                })
-                .flatMap(usuIn -> Flux.fromIterable(usuario.getRoles())
-                        .flatMap(r -> Mono.fromRunnable(() -> this.usuarioRolRepository.insertarUsuarioRol(usuIn.getId(), r.getId())))
-                        .then(Mono.just(usuIn)))
-                .map(this.usuarioToUsuarioResponse::map);
+        return Mono.fromCallable(() -> guardar(usuario, locale))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    private UsuarioResponse guardar(UsuarioRequest usuario, Locale locale){
+        UsuarioRequest u = this.validarRequest(usuario, locale);
+        Usuario usuarioEntidad = this.usuarioRequestToUsuario.map(u);
+        usuarioEntidad.setContrasenia(pbkdf2Encoder.encode(usuarioEntidad.getContrasenia()));
+        Usuario usuIn =  usuarioRepository.save(usuarioEntidad);
+        usuario.getRoles().forEach(r ->{
+            this.usuarioRolRepository.insertarUsuarioRol(usuIn.getId(), r.getId());
+        });
+        return this.usuarioToUsuarioResponse.map(usuIn);
     }
 
     @Override

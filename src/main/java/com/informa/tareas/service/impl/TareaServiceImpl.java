@@ -49,24 +49,24 @@ public class TareaServiceImpl implements TareaService {
         this.validator = validator;
     }
 
-    @Transactional
     @Override
     public Mono<TareaResponse> crear(TareaInsertRequest request, Locale locale) {
         return Mono.just(request)
                 .flatMap(tir -> this.validarRequest(tir, locale))
                 .flatMap(u -> Mono.just(this.tareaRequestToTarea.mapInsert(u)))
-                .flatMap(t -> Mono.just(this.tareaRepository.save(t))
+                .flatMap(t -> Mono.fromCallable(()->this.tareaRepository.save(t))
+                        .publishOn(Schedulers.boundedElastic())
                         .map(this.tareaToTareaResponse::map));
     }
 
-    @Transactional
     @Override
     public Mono<TareaResponse> actualizar(TareaUpdateRequest request, Locale locale) {
         return Mono.just(request)
                 .flatMap(tir -> this.validarRequest(tir, locale))
                 .flatMap(u -> Mono.just(this.tareaRequestToTarea.mapUpdate(u)))
-                .flatMap(t -> Mono.just(this.tareaRepository.save(t)))
-                .map(this.tareaToTareaResponse::map);
+                .flatMap(t -> Mono.fromCallable(()->this.tareaRepository.save(t))
+                .publishOn(Schedulers.boundedElastic())
+                .map(this.tareaToTareaResponse::map));
     }
 
     @Transactional
